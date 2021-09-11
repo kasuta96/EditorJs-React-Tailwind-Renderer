@@ -1,56 +1,52 @@
 /** ChecklistOutput
   *
   * @version 1.0.0
-  * @created - 2020.05.25
-  * @author - Adombang Munang Mbomndih (Bomdi) <dzedock@gmail.com> (https://bomdisoft.com)
-  *
-  * Version History
-  * ---------------
-  * @version 1.0.1 - 2020.07.17 - Add config parameter - Adombang Munang Mbomndih
-  * @version 1.1.0 - 2021.04.11 - Add classNames parameter - Adombang Munang Mbomndih
-  * @version 1.1.1 - 2021.04.12 - Add validation for config parameter - Adombang Munang Mbomndih
+  * @created - 2021.08.01
+  * @author - kasuta <kasuta96@gmail.com>
   */
 
 //#region imports
-import React from 'react';
-import ReactHtmlParser from 'react-html-parser';
-import classnames from 'classnames';
-import checklistOutputStyle from './style';
-import checklistStyle from './style.css';
+import React from 'react'
+import ReactHtmlParser from 'react-html-parser'
+import { BadgeCheckIcon as CheckIcon } from '@heroicons/react/outline'
+import { BadgeCheckIcon as CheckedIcon } from '@heroicons/react/solid'
 //#endregion
 
-const supportedKeys = ['container', 'item', 'checkbox', 'label'];
 
 const ChecklistOutput = ({ data, style, classNames, config }) => {
   if (!data || !data.items || !Array.isArray(data.items) || data.items.length < 1) return '';
-  if (!style || typeof style !== 'object') style = {};
+  if (!style || typeof style !== 'object') style = {
+    item: '',
+    checkbox: '',
+    label: '',
+    container: ''
+  };
   if (!config || typeof config !== 'object') config = {};
-  if (!classNames || typeof classNames !== 'object') classNames = {};
-
-  supportedKeys.forEach(key => {
-    if (!style[key] || typeof style[key] !== 'object') style[key] = {};
-    if (!classNames[key] || typeof classNames[key] !== 'string') classNames[key] = '';
-  });
-
-  const containerStyle = config.disableDefaultStyle ? style.container : { ...checklistOutputStyle.container, ...style.container };
-  const itemStyle = config.disableDefaultStyle ? style.item : { ...checklistOutputStyle.item, ...style.item };
-  const checkboxStyle = config.disableDefaultStyle ? style.checkbox : { ...checklistOutputStyle.checkbox, ...style.checkbox };
-  const labelStyle = config.disableDefaultStyle ? style.label : { ...checklistOutputStyle.label, ...style.label };
+  if (!classNames || typeof classNames !== 'object' || Object.keys(classNames).length < 1) classNames = {
+    item: 'flex items-center space-x-3 mb-3',
+    label: 'text-gray-700 dark:text-white font-normal',
+    container: 'mx-4 my-8'
+  };
 
   let content = [];
 
   if (typeof data === 'object') {
     if (data.items && Array.isArray(data.items)) content = data.items.map((item, index) =>
-      <div key={ index } style={ itemStyle } className={ classNames.item }>
-        <input id={ index } style={ checkboxStyle } className={ classNames.checkbox } type='checkbox' checked={ item.checked } />
-        <label for={ index } style={ labelStyle } className={ classNames.label }>{ ReactHtmlParser(item.text) }</label>
+      <div key={index} style={style.item} className={classNames.item}>
+        {item.checked
+          ?
+          <CheckedIcon className="text-blue-600 h-6 w-6" />
+          :
+          <CheckIcon className="text-gray-400 h-6 w-6" />
+        }
+        <label style={style.label} className={classNames.label}>{ReactHtmlParser(item.text)}</label>
       </div>
     );
   }
 
   if (content.length <= 0) return '';
 
-  return <ul style={ containerStyle } className={ classnames('checklistUL', classNames.container) }>{ content }</ul>;
+  return <div style={style.container} className={classNames.container}>{content}</div>;
 };
 
 export default ChecklistOutput;

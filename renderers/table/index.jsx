@@ -1,66 +1,61 @@
 /** TableOutput
-  *
-  * @version 1.0.0
-  * @created - 2019.11.02
-  * @author - Adombang Munang Mbomndih (Bomdi) <dzedock@gmail.com> (https://bomdisoft.com)
-  *
-  * Version History
-  * ---------------
-  * @version 1.0.1 - 2020.02.12 - Covert to React component - Adombang Munang Mbomndih
-  * @version 1.0.2 - 2020.05.21 - Add key to list items - Adombang Munang Mbomndih
-  * @version 1.0.3 - 2020.07.17 - Add config parameter - Adombang Munang Mbomndih
-  * @version 1.1.0 - 2021.04.11 - Add classNames parameter - Adombang Munang Mbomndih
-  * @version 1.1.1 - 2021.04.12 - Add validation for config parameter - Adombang Munang Mbomndih
-  */
+ *
+ * @version 1.0.0
+ * @created - 2021.08.01
+ * @author - kasuta <kasuta96@gmail.com>
+ */
 
 //#region imports
-import React from 'react';
-import ReactHtmlParser from 'react-html-parser';
-import tableOutputStyle from './style';
+import React from "react"
+import ReactHtmlParser from "react-html-parser"
 //#endregion
 
-const supportedKeys = ['table', 'tr', 'th', 'td'];
+const TableOutput = ({ data }) => {
+  if (!data) return ""
 
-const TableOutput = ({ data, style, classNames, config }) => {
-  if (!data) return '';
-  if (!style || typeof style !== 'object') style = {};
-  if (!config || typeof config !== 'object') config = {};
-  if (!classNames || typeof classNames !== 'object') classNames = {};
+  let content = data.content || []
+  if (!Array.isArray(content) || content.length < 1) return ""
 
-  supportedKeys.forEach(key => {
-    if (!style[key] || typeof style[key] !== 'object') style[key] = {};
-    if (!classNames[key] || typeof classNames[key] !== 'string') classNames[key] = '';
-  });
+  const columnNames = content.shift()
 
-  const tableStyle = config.disableDefaultStyle ? style.table : { ...tableOutputStyle.table, ...style.table };
-  const trStyle = config.disableDefaultStyle ? style.tr : { ...tableOutputStyle.tr, ...style.tr };
-  const thStyle = config.disableDefaultStyle ? style.th : { ...tableOutputStyle.th, ...style.th };
-  const tdStyle = config.disableDefaultStyle ? style.td : { ...tableOutputStyle.td, ...style.td };
+  return (
+    <div className="flex flex-col">
+      <div className="overflow-x-auto">
+        <div className="py-8 align-middle inline-block min-w-full">
+          <div className="shadow overflow-hidden rounded-lg">
+            <table className="min-w-full divide-y divide-gray-400">
+              <thead className="bg-50">
+                <tr>
+                  {columnNames.map((columnName, index) => (
+                    <th
+                      key={index}
+                      scope="col"
+                      className="px-6 py-4 text-left text-xs font-medium text-700 uppercase tracking-wider"
+                    >
+                      {ReactHtmlParser(columnName)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="bg-200 divide-y divide-gray-400 text-600">
+                {content.map((row, index) => (
+                  <tr key={index}>
+                    {Array.isArray(row) &&
+                      row.length > 1 &&
+                      row.map((columnValue, i) => (
+                        <td key={i} className="px-6 py-4 whitespace-nowrap">
+                          {ReactHtmlParser(columnValue)}
+                        </td>
+                      ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
-  let content = data.content || [];
-  if (!Array.isArray(content) || content.length < 1) return '';
-
-  const columnNames = content.shift();
-
-  return <table style={ tableStyle } className={ classNames.table }>
-    <thead>
-      <tr style={ trStyle } className={ classNames.tr }>
-        { columnNames.map((columnName, index) => <th key={ index } style={ thStyle } className={ classNames.th }>{ ReactHtmlParser(columnName) }</th>) }
-      </tr>
-    </thead>
-    <tbody>
-      {
-        content.map((row, index) => (
-          <tr key={ index } style={ config.disableDefaultStyle ? trStyle : { backgroundColor: index % 2 === 0 ? 'white' : '#f9f9f9', ...trStyle }} className={ classNames.tr }>
-            {
-              Array.isArray(row) && row.length > 1 &&
-              row.map((columnValue, i) => <td key={ i } style={ tdStyle } className={ classNames.td }>{ ReactHtmlParser(columnValue) }</td>)
-            }
-          </tr>
-        ))
-      }
-    </tbody>
-  </table>;
-};
-
-export default TableOutput;
+export default TableOutput

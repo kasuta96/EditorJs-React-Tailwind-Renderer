@@ -1,53 +1,62 @@
 /** ListOutput
-  *
-  * @version 1.0.0
-  * @created - 2019.08.20
-  * @author - Adombang Munang Mbomndih (Bomdi) <dzedock@gmail.com> (https://bomdisoft.com)
-  *
-  * Version History
-  * ---------------
-  * @version 1.0.1 - 2020.02.12 - Covert to React component - Adombang Munang Mbomndih
-  * @version 1.0.2 - 2020.07.17 - Add config parameter - Adombang Munang Mbomndih
-  * @version 1.1.0 - 2021.04.11 - Add classNames parameter - Adombang Munang Mbomndih
-  * @version 1.1.1 - 2021.04.12 - Add validation for config parameter - Adombang Munang Mbomndih
-  */
+ *
+ * @version 1.0.0
+ * @created - 2021.08.01
+ * @author - kasuta <kasuta96@gmail.com>
+ */
 
 //#region imports
-import React from 'react';
-import ReactHtmlParser from 'react-html-parser';
-import listOutputStyle from './style';
+import React from "react"
+import ReactHtmlParser from "react-html-parser"
 //#endregion
 
-const validListStyles = ['ordered', 'unordered'];
-const supportedKeys = ['container', 'listItem'];
+const validListStyles = ["ordered", "unordered"]
 
 const ListOutput = ({ data, style, classNames, config }) => {
-  if (!data) return '';
-  if (!style || typeof style !== 'object') style = {};
-  if (!config || typeof config !== 'object') config = {};
-  if (!classNames || typeof classNames !== 'object') classNames = {};
+  if (!data) return ""
+  if (!style || typeof style !== "object") style = {}
+  if (!config || typeof config !== "object") config = {}
+  if (
+    !classNames ||
+    typeof classNames !== "object" ||
+    Object.keys(classNames).length < 1
+  )
+    classNames = {
+      container: "my-8 mr-4 ml-4 md:ml-8",
+      item: "ml-2",
+    }
 
-  supportedKeys.forEach(key => {
-    if (!style[key] || typeof style[key] !== 'object') style[key] = {};
-    if (!classNames[key] || typeof classNames[key] !== 'string') classNames[key] = '';
-  });
+  let content = [],
+    listType = "ordered"
 
-  const containerStyle = config.disableDefaultStyle ? style.container : { ...listOutputStyle.container, ...style.container };
-  const listItemStyle = config.disableDefaultStyle ? style.listItem : { ...listOutputStyle.listItem, ...style.listItem };
-  let content = [], listType = 'unordered';
+  if (typeof data === "string") content.push(data)
+  else if (typeof data === "object") {
+    if (data.style && validListStyles.includes(data.style))
+      listType = data.style
 
-  if (typeof data === 'string') content.push(data);
-  else if (typeof data === 'object') {
     if (data.items && Array.isArray(data.items))
-      content = data.items.map((item, index) =>
-        <li key={ index } style={ listItemStyle } className={ classNames.listItem }>{ ReactHtmlParser(item) }</li>);
-    if (data.style && validListStyles.includes(data.style)) listType = data.style;
+      content = data.items.map((item, index) => (
+        <li key={index} className="relative">
+          <div className="h-full w-6 absolute inset-0 flex justify-center -ml-6">
+            <div className="h-full w-1 bg-300 pointer-events-none"></div>
+          </div>
+          <div className="w-6 h-6 rounded-full inline-flex items-center justify-center bg-indigo-500 text-white relative text-sm -ml-6">
+            {listType == "ordered" ? index + 1 : ""}
+          </div>
+          <p style={style.item} className={classNames.item}>
+            {ReactHtmlParser(item)}
+          </p>
+        </li>
+      ))
   }
 
-  if (content.length <= 0) return '';
-  if (listType === 'ordered') return <ol style={ containerStyle } className={ classNames.container }>{ content }</ol>;
+  if (content.length <= 0) return ""
 
-  return <ul style={ containerStyle } className={ classNames.container }>{ content }</ul>;
-};
+  return (
+    <ul style={style.container} className={classNames.container}>
+      {content}
+    </ul>
+  )
+}
 
-export default ListOutput;
+export default ListOutput
